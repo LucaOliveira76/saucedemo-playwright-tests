@@ -23,4 +23,30 @@ test.describe('Inventory functionality', () => {
             await expect(product.getByRole('img')).toBeVisible();
         };
     });
+
+    test('should sort products for A-Z', async ({ page }) => {
+        // Confirm that the inventory contains products before taking a snapshot.
+        await expect(page.getByTestId('inventory-item')).toHaveCount(6);
+
+        // Build the expected A-Z order from the current product set.
+        const productNamesBeforeSorting = await page.getByTestId('inventory-item-name').allTextContents();
+        const sortedProductNames = [...productNamesBeforeSorting].sort();
+
+        // Apply A-Z sorting and verify the displayed order.
+        await page.getByTestId('product-sort-container').selectOption('az');
+        await expect(page.getByTestId('inventory-item-name')).toHaveText(sortedProductNames);
+    });
+
+    test('should sort products for Z-A', async ({ page }) => {
+        // Confirm that the inventory contains products before taking a snapshot.
+        await expect(page.getByTestId('inventory-item')).toHaveCount(6);
+
+        // Build the expected Z-A order from the current product set.
+        const productNamesBeforeSorting = await page.getByTestId('inventory-item-name').allTextContents();
+        const sortedProductNames = [...productNamesBeforeSorting].sort().reverse();
+
+        // Apply Z-A sorting and verify the displayed order.
+        await page.getByTestId('product-sort-container').selectOption('za');
+        await expect(page.getByTestId('inventory-item-name')).toHaveText(sortedProductNames);
+    });
 });
