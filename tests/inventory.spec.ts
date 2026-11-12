@@ -160,4 +160,33 @@ test.describe('Inventory functionality', () => {
         await expect(page.getByTestId('shopping-cart-badge')).toHaveCount(0);
     });
 
+    test('should show the details of a product', async ({ page }) => {
+        const selectedProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Backpack'});
+
+        const productName = await selectedProduct.getByTestId('inventory-item-name').innerText();
+        const productDescription = await selectedProduct.getByTestId('inventory-item-desc').innerText();
+        const productPrice = await selectedProduct.getByTestId('inventory-item-price').innerText();
+
+        await selectedProduct.getByTestId('inventory-item-name').click();
+
+        await expect(page).toHaveURL(/inventory-item\.html\?id=\d+/);
+
+        await expect(page.getByTestId('inventory-item-name')).toHaveText(productName);
+        await expect(page.getByTestId('inventory-item-desc')).toHaveText(productDescription);
+        await expect(page.getByTestId('inventory-item-price')).toHaveText(productPrice);
+    });
+
+
+    test('should return to inventory after inspecting product details', async ({ page }) => {
+        const selectedProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Backpack'});
+
+        await selectedProduct.getByTestId('inventory-item-name').click();
+
+        await expect(page).toHaveURL(/inventory-item\.html\?id=\d+/);
+
+        await page.getByTestId('back-to-products').click();
+
+        await expect(page).toHaveURL(/inventory\.html/);
+        await expect(page.getByTestId('inventory-item')).toHaveCount(6);
+    });
 });
