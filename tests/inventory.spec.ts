@@ -63,7 +63,7 @@ test.describe('Inventory functionality', () => {
 
         // Apply low to high price sorting.
         await page.getByTestId('product-sort-container').selectOption('lohi');
-        
+
         // Use expect.poll to wait for the displayed prices to match the sorted prices.
         await expect.poll(async () => {
             const displayedPrices = await page.getByTestId('inventory-item-price').allTextContents();
@@ -84,7 +84,7 @@ test.describe('Inventory functionality', () => {
 
         // Apply high to low price sorting.
         await page.getByTestId('product-sort-container').selectOption('hilo');
-        
+
         // Use expect.poll to wait for the displayed prices to match the sorted prices.
         await expect.poll(async () => {
             const displayedPrices = await page.getByTestId('inventory-item-price').allTextContents();
@@ -96,7 +96,7 @@ test.describe('Inventory functionality', () => {
     test('should remove a product from the cart when clicking "Remove" button', async ({ page }) => {
         // Select the product to be removed from the cart.
         const selectedProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Backpack'});
-        
+
         // Add the selected product to the cart using its data-test.
         await selectedProduct.getByTestId('add-to-cart-sauce-labs-backpack').click();
             // .getByRole('button', { name: 'Add to cart' }).click();
@@ -106,5 +106,64 @@ test.describe('Inventory functionality', () => {
         // await selectedProduct.getByRole('button', { name: 'Add to cart' }).click();
         // await expect(page.getByTestId('shopping_cart_badge')).toHaveText('1');
         await page.waitForTimeout(1000); // Wait for the cart badge to update
+
+        // Click the "Remove" button for the selected product.
+        await selectedProduct.getByTestId('remove-sauce-labs-backpack').click();
+        // Verify the cart badge updates.
+        await expect(page.getByTestId('shopping-cart-badge')).toHaveText('0');
     });
+
+    test('should add a product to the cart using the "Add to cart" button and verify the cart badge updates', async ({ page }) => {
+        // Select the product to be added to the cart.
+        const selectedProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Backpack'});
+
+        // Add the selected product to the cart.
+        await selectedProduct.getByRole('button', { name: 'Add to cart' }).click();
+
+        // Verify the cart badge updates.
+        await expect(page.getByTestId('shopping-cart-badge')).toHaveText('1');
+
+        // await expect(page.getByTestId('remove-sauce-labs-backpack')).toHaveText('Remove');
+        await expect(selectedProduct.getByRole('button', { name: 'Remove' })).toBeVisible();
+    });
+
+    test('should add two products to the cart and verify the cart badge updates', async ({ page }) => {
+        // Select the products to be added to the cart.
+        const firstProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Backpack'});
+        const secondProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Bike Light'});
+
+        // Add the selected products to the cart.
+        await firstProduct.getByRole('button', { name: 'Add to cart' }).click();
+        await secondProduct.getByRole('button', { name: 'Add to cart' }).click();
+
+        // Verify the cart badge updates.
+        await expect(page.getByTestId('shopping-cart-badge')).toHaveText('2');
+
+        // Verify that the "Remove" button is visible for both products.
+        await expect(firstProduct.getByRole('button', { name: 'Remove' })).toBeVisible();
+        await expect(secondProduct.getByRole('button', { name: 'Remove' })).toBeVisible();
+
+    });
+
+    test('should remove a product from the cart and verify the cart badge updates', async ({ page }) => {
+        // Select the product to be added and then removed from the cart.
+        const selectedProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Backpack'});
+
+        // Add the selected product to the cart.
+        await selectedProduct.getByRole('button', { name: 'Add to cart' }).click();
+
+        // Verify the cart badge updates.
+        await expect(page.getByTestId('shopping-cart-badge')).toHaveText('1');
+
+        // Click the "Remove" button for the selected product.
+        await selectedProduct.getByRole('button', { name: 'Remove' }).click();
+
+        // Verify the 'Add to cart' button is visible again.
+        await expect(selectedProduct.getByRole('button', { name: 'Add to cart' })).toBeVisible();
+
+        // Verify the cart badge updates.
+        await expect(page.getByTestId('shopping-cart-link')).toHaveAttribute('aria-label', 'Cart, empty');
+        await expect(page.getByTestId('shopping-cart-badge')).toHaveCount(0);
+    });
+
 });
