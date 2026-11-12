@@ -95,23 +95,16 @@ test.describe('Inventory functionality', () => {
     });
 
     test('should remove a product from the cart when clicking "Remove" button', async ({ page }) => {
-        // Select the product to be removed from the cart.
         const selectedProduct = page.getByTestId('inventory-item').filter({hasText: 'Sauce Labs Backpack'});
 
-        // Add the selected product to the cart using its data-test.
-        await selectedProduct.getByTestId('add-to-cart-sauce-labs-backpack').click();
-            // .getByRole('button', { name: 'Add to cart' }).click();
-        // check if component with id shopping-cart-link has aria-label attribute with value "1"
-        // await expect(page.getByTestId('shopping-cart-link')).toHaveAttribute('aria-label', '1 items');
-        await expect(page.getByTestId('shopping-cart-badge')).toHaveText('1');
-        // await selectedProduct.getByRole('button', { name: 'Add to cart' }).click();
-        // await expect(page.getByTestId('shopping_cart_badge')).toHaveText('1');
-        await page.waitForTimeout(1000); // Wait for the cart badge to update
+        await selectedProduct.getByRole('button', { name: 'Add to cart' }).click();
 
-        // Click the "Remove" button for the selected product.
-        await selectedProduct.getByTestId('remove-sauce-labs-backpack').click();
-        // Verify the cart badge updates.
-        await expect(page.getByTestId('shopping-cart-badge')).toHaveText('0');
+        await expect(page.getByTestId('shopping-cart-link')).toHaveAttribute('aria-label', 'Cart, 1 items');
+        await expect(page.getByTestId('shopping-cart-badge')).toHaveText('1');
+
+        await selectedProduct.getByRole('button', { name: 'Remove' }).click();
+
+        await expect(selectedProduct.getByRole('button', { name: 'Add to cart' })).toBeVisible();
     });
 
     test('should add a product to the cart using the "Add to cart" button and verify the cart badge updates', async ({ page }) => {
